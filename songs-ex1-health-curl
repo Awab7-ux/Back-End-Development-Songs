@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.9 Python/3.14.2
+Date: Mon, 09 Nov 2026 13:50:05 GMT
+Content-Type: application/json
+Content-Length: 21
+Connection: close
+
+{
+  "status": "OK"
+}

@@ -20,7 +20,7 @@ A Flask + PyMongo microservice for managing songs stored in MongoDB.
 | GET | `/song` | List all songs | 200 |
 | GET | `/song/<id>` | Get a song by ID | 200 (404 if not found) |
 | POST | `/song` | Create a song | 201 (302 if ID exists) |
-| PUT | `/song/<id>` | Update a song | 201 (404 if not found) |
+| PUT | `/song/<id>` | Update a song | 200 (404 if not found) |
 | DELETE | `/song/<id>` | Delete a song | 204 (404 if not found) |
 
 ## Environment Variables
@@ -29,10 +29,8 @@ Configure the MongoDB connection with these environment variables:
 
 | Variable | Description |
 | --- | --- |
-| `MONGODB_SERVICE` | MongoDB service hostname |
-| `MONGODB_USERNAME` | MongoDB username |
-| `MONGODB_PASSWORD` | MongoDB password |
-| `MONGODB_PORT` | MongoDB port |
+| `MONGODB_URI` | MongoDB connection string (default `mongodb://localhost:27017`) |
+| `MONGODB_DATABASE` | Database name (default `songs`) |
 
 ## Run Locally
 
@@ -40,10 +38,10 @@ Install the dependencies and start the Flask development server:
 
 ```bash
 pip install -r requirements.txt
-flask --app backend run -p 5000
+flask --app songs run --debug
 ```
 
-The examples below use `http://localhost:5000`. The create and update examples use `title` and `artist` as representative song fields; use the field names accepted by your application if they differ.
+The service seeds the MongoDB `songs` collection from `songs/songs.json` when a data endpoint is first used. Seed documents are inserted only when their integer IDs are not already present.
 
 ## cURL Examples
 
@@ -68,7 +66,7 @@ curl -i http://localhost:5000/song
 Get a song by ID:
 
 ```bash
-curl -i http://localhost:5000/song/64f1a2b3c4d5e6f7890abcde
+curl -i http://localhost:5000/song/1
 ```
 
 Create a song:
@@ -76,21 +74,21 @@ Create a song:
 ```bash
 curl -i -X POST http://localhost:5000/song \
 	-H 'Content-Type: application/json' \
-	-d '{"title":"Northern Lights","artist":"Example Artist"}'
+	-d '{"id":11,"title":"Northern Lights","lyrics":"A new song begins"}'
 ```
 
 Update a song by ID:
 
 ```bash
-curl -i -X PUT http://localhost:5000/song/64f1a2b3c4d5e6f7890abcde \
+curl -i -X PUT http://localhost:5000/song/1 \
 	-H 'Content-Type: application/json' \
-	-d '{"title":"Northern Lights (Live)","artist":"Example Artist"}'
+	-d '{"id":1,"title":"Morning Window Updated","lyrics":"Updated lyrics"}'
 ```
 
 Delete a song by ID:
 
 ```bash
-curl -i -X DELETE http://localhost:5000/song/64f1a2b3c4d5e6f7890abcde
+curl -i -X DELETE http://localhost:5000/song/1
 ```
 
 ## Docker
@@ -102,14 +100,14 @@ docker build -t songs .
 docker run -p 8080:8080 songs
 ```
 
-## Project Structure
-
-The workspace currently contains only this README. The following is the expected high-level layout for the service; application files are not present in the current workspace snapshot.
+## Project structure
 
 ```text
 .
-├── backend/          # Flask application and API routes
-├── requirements.txt  # Python dependencies
-├── Dockerfile        # Container image definition
+├── songs/
+│   ├── __init__.py
+│   ├── routes.py
+│   └── songs.json
+├── requirements.txt
 └── README.md
 ```
